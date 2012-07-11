@@ -143,7 +143,8 @@ function theme_badges($variables) {
       $output .= l(
         theme('image', array(
           'path' => $badge['badge'],
-          'alt' => $badge['description'],
+          'alt' => $badge['name'],
+          'title' => $badge['description'],
           'width' => 65,
           'height' => 65,
           'attributes' => array('class' => 'coderwall-badge'),
