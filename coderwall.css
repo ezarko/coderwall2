@@ -1,0 +1,53 @@
+.block-coderwall2 .content {
+  font-family: Helvetica;
+  margin-left: auto;
+  margin-right: auto;
+  clear: both;
+  float: left;
+  text-align: center;
+  margin: 18px 0px 0px 8px;
+}
+
+.block-coderwall2 .content .coderwall-logo {
+  float: left;
+  margin: 14px 0px 0px 0px;
+  border-radius: 5px;
+  padding: 8px 10px 8px 8px;
+  background: -webkit-gradient(linear, left top, left bottom, from(#6A7176), to(#4D5256));
+  background: -moz-linear-gradient(-90deg, #6A7176, #4D5256);
+}
+
+.block-coderwall2 .content .coderwall-logo:hover .coderwall-tag-name {
+  color: #BED4FA;
+}
+
+.block-coderwall2 .content .coderwall-badge {
+  float: left;
+}
+
+.block-coderwall2 .content .coderwall-badge:hover {
+  opacity: 0.8;
+}
+
+.block-coderwall2 .content .coderwall-icon {
+  float: left;
+  width: 15px;
+}
+
+.block-coderwall2 .content .coderwall-tag-container {
+  float: left;
+  padding-left: 8px;
+  margin-top: -3px;
+}
+
+.block-coderwall2 .content .coderwall-tag-name {
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  text-shadow: black 0 1px 0;
+}
+
+.block-coderwall2 .content .coderwall-tag-text {
+  color: #aaa;
+  font-size: 12px;
+}

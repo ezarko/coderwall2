@@ -1,0 +1,120 @@
+<?php
+
+/**
+ * Implements hook_block_info().
+ */
+function coderwall2_block_info() {
+  $blocks['coderwall'] = array(
+    'info' => t('Coderwall'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_configure().
+ */
+function coderwall2_block_configure($delta = '') {
+  $form = array();
+  if ($delta == 'coderwall') {
+    $form['coderwall_username'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Coderwall username'),
+      '#size' => 60,
+      '#description' => t('Required in order for the block to figure out whose badges to retrieve.'),
+      '#default_value' => variable_get('coderwall_username'),
+    );
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_block_save().
+ */
+function coderwall2_block_save($delta = '', $edit = array()) {
+  if ($delta == 'coderwall') {
+    variable_set('coderwall_username', $edit['coderwall_username']);
+  }
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function coderwall2_block_view($delta = '') {
+  switch($delta){
+    case 'coderwall':
+      if (user_access('access content')) {
+        $username = variable_get('coderwall_username');
+        if (isset($username)) {
+          $url = "http://coderwall.com/$username.json?source=jqcw";
+          $response = drupal_http_request($url);
+          $data = json_decode($response->data, TRUE);
+          $block['content'] = theme('badges', $data);
+          return $block;
+        }
+      }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function coderwall2_theme() {
+  return array(
+    'badges' => array(
+      'variables' => array('username' => NULL, 'badges' => array()),
+    ),
+  );
+}
+
+/**
+ * Implements theme('badges').
+ */
+function theme_badges($variables) {
+  $username = $variables['username'];
+  //$name = $variables['name']; // 'Eric A. Zarko'
+  //$location = $variables['location']; // 'Marin County, California'
+  //$endorsements = $variables['endorsements']; // 0
+  //$team = $variables['team']; // NULL
+  //$accounts = $variables['accounts']; // array ('github' => 'ezarko')
+  $badges = $variables['badges'];
+
+  drupal_add_css(drupal_get_path('module', 'coderwall2') . '/coderwall.css');
+
+  $output = '';
+
+  if (empty($badges)) {
+    $output = t('No badges earned.');
+  }
+  else {
+    foreach ($badges as $badge) {
+      $output .= l(
+        theme('image', array(
+          'path' => $badge['badge'],
+          'alt' => $badge['description'],
+          'width' => 65,
+          'height' => 65,
+          'attributes' => array('class' => 'coderwall-badge'),
+        )),
+        "http://coderwall.com/$username",
+        array('html' => TRUE)
+      );
+    }
+  }
+
+  $output .= "<div class='coderwall-logo'>";
+  $output .= l(
+    theme('image', array(
+      'path' => 'http://coderwall.com/images/icon.png',
+      'attributes' => array('class' => 'coderwall-icon'),
+    )) .
+    "<div class='coderwall-tag-container'><div class='coderwall-tag-name'>coderwall</div></div>",
+    'http://coderwall.com',
+    array('html' => TRUE)
+  );
+  $output .= "</div>";
+
+  return $output;
+}
+
+?>
