@@ -37,6 +37,12 @@ function coderwall2_block_save($delta = '', $edit = array()) {
   }
 }
 
+function _coderwall2_get_data($username) {
+  $url = "http://coderwall.com/$username.json?source=jqcw";
+  $response = drupal_http_request($url);
+  return json_decode($response->data, TRUE);
+}
+
 /**
  * Implements hook_block_view().
  */
@@ -46,13 +52,59 @@ function coderwall2_block_view($delta = '') {
       if (user_access('access content')) {
         $username = variable_get('coderwall_username');
         if (isset($username)) {
-          $url = "http://coderwall.com/$username.json?source=jqcw";
-          $response = drupal_http_request($url);
-          $data = json_decode($response->data, TRUE);
+          $data = _coderwall2_get_data($username);
           $block['content'] = theme('badges', $data);
           return $block;
         }
       }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function coderwall2_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
+  if ($form['#user_category'] != 'account') {
+    // Do not show this form for different categories.
+    return;
+  }
+  $data = $form['#user']->data;
+  $form['coderwall'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Coderwall settings',
+    'coderwall_username' => array(
+      '#type' => 'textfield',
+      '#title' => 'Username',
+      '#description' => 'Enter your Coderwall username (e.g. http://coderwall.com/USERNAME).',
+      '#default_value' => array_key_exists('coderwall_username', $data) ? $data['coderwall_username'] : '',
+    ),
+  );
+}
+
+/**
+ * Implements hook_user_presave().
+ */
+function coderwall2_user_presave(&$edit, $account, $category) {
+  if (isset($edit['coderwall_username'])) {
+    $edit['data']['coderwall_username'] = $edit['coderwall_username'];
+  }
+}
+
+/**
+ * Implements hook_user_view().
+ */
+function coderwall2_user_view($account) {
+  if (user_access('create blog content', $account)) {
+    if (array_key_exists('coderwall_username', $account->data)) {
+      $data = _coderwall2_get_data($account->data['coderwall_username']);
+      $account->content['summary']['coderwall'] =  array(
+        '#type' => 'user_profile_item',
+        '#title' => t('Coderwall'),
+        // l() escapes the attributes, so we should not escape !username here.
+        '#markup' => theme('badges', $data),
+        '#attributes' => array('class' => array('blog')),
+      );
+    }
   }
 }
 
