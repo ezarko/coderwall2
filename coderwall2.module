@@ -37,12 +37,6 @@ function coderwall2_block_save($delta = '', $edit = array()) {
   }
 }
 
-function _coderwall2_get_data($username) {
-  $url = "http://coderwall.com/$username.json?source=jqcw";
-  $response = drupal_http_request($url);
-  return json_decode($response->data, TRUE);
-}
-
 /**
  * Implements hook_block_view().
  */
@@ -53,7 +47,8 @@ function coderwall2_block_view($delta = '') {
         $username = variable_get('coderwall_username');
         if (isset($username)) {
           $data = _coderwall2_get_data($username);
-          $block['content'] = theme('badges', $data);
+          $block['content'] = theme('badges', $data) . _coderwall2_logo();
+
           return $block;
         }
       }
@@ -94,14 +89,18 @@ function coderwall2_user_presave(&$edit, $account, $category) {
  * Implements hook_user_view().
  */
 function coderwall2_user_view($account) {
-  if (user_access('create blog content', $account)) {
+  if (user_access('access content')) {
     if (array_key_exists('coderwall_username', $account->data)) {
       $data = _coderwall2_get_data($account->data['coderwall_username']);
-      $account->content['summary']['coderwall'] =  array(
+      $account->content['coderwall'] = array(
+        '#type' => 'user_profile_category',
+        '#title' => '',
+        '#weight' => 15,
+      );
+      $account->content['coderwall']['badges'] =  array(
         '#type' => 'user_profile_item',
-        '#title' => t('Coderwall'),
-        // l() escapes the attributes, so we should not escape !username here.
-        '#markup' => theme('badges', $data),
+        '#title' => '',
+        '#markup' => '<div>' . theme('badges', $data) . _coderwall2_logo() . '</div>',
         '#attributes' => array('class' => array('blog')),
       );
     }
@@ -136,7 +135,7 @@ function theme_badges($variables) {
   $output = '';
 
   if (empty($badges)) {
-    $output = t('No badges earned.');
+    $output .= t('No badges earned.');
   }
   else {
     foreach ($badges as $badge) {
@@ -155,19 +154,27 @@ function theme_badges($variables) {
     }
   }
 
-  $output .= "<div class='coderwall-logo'>";
-  $output .= l(
+  return $output;
+}
+
+function _coderwall2_get_data($username) {
+  $url = "http://coderwall.com/$username.json?source=jqcw";
+  $response = drupal_http_request($url);
+  return json_decode($response->data, TRUE);
+}
+
+function _coderwall2_logo() {
+  return '<div class="coderwall-logo">' .
+  l(
     theme('image', array(
       'path' => 'http://coderwall.com/images/icon.png',
       'attributes' => array('class' => 'coderwall-icon'),
     )) .
-    "<div class='coderwall-tag-container'><div class='coderwall-tag-name'>coderwall</div></div>",
+    '<div class="coderwall-tag-container"><div class="coderwall-tag-name">coderwall</div></div>',
     'http://coderwall.com',
     array('html' => TRUE)
-  );
-  $output .= "</div>";
-
-  return $output;
+  ) .
+  '</div>';
 }
 
 ?>
