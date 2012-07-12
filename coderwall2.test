@@ -1,0 +1,27 @@
+<?php
+class CoderwallTestCase extends DrupalUnitTestCase {
+  public static function getInfo() {
+    // Note: getInfo() strings should not be translated.
+    return array(
+      'name' => 'Coderwall unit tests',
+      'description' => 'Test that Coderwall works properly.',
+      'group' => 'Coderwall',
+    );
+  }
+
+  function testAPI() {
+    $result = _coderwall2_get_data(NULL);
+    $this->assertNull($result);
+
+    $result = _coderwall2_get_data('');
+    $this->assertNull($result);
+
+    $result = _coderwall2_get_data('dmnsdklcvsdkj');
+    $this->assertNull($result);
+
+    $result = _coderwall2_get_data('ezarko');
+    $this->assertNotNull($result);
+    $this->assertEqual($result['username'], 'ezarko');
+  }
+}
+?>

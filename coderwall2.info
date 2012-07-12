@@ -2,3 +2,4 @@ name = Coderwall2
 description = The Coderwall module provides integration with the Coderwall service, allowing you to display Coderwall achievements on your site.
 package = Other
 core = 7.x
+files[] = coderwall2.test

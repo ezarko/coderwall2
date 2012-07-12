@@ -160,7 +160,9 @@ function theme_badges($variables) {
 function _coderwall2_get_data($username) {
   $url = "http://coderwall.com/$username.json?source=jqcw";
   $response = drupal_http_request($url);
-  return json_decode($response->data, TRUE);
+  if ($response->code == 200) {
+    return json_decode($response->data, TRUE);
+  }
 }
 
 function _coderwall2_logo() {
